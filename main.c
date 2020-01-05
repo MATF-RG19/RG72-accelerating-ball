@@ -3,6 +3,7 @@
 #include<math.h>
 #include<time.h>
 #include<string.h>
+#include<stdbool.h>
 #define TIMER_ID 1
 #define TIMER_INTERVAL 20
 
@@ -13,17 +14,20 @@ static void on_timer(int id);
 static void drawTrack();
 static void drawBall();
 static void drawWall();
+static void crash();
 static int i;
+int score = 0;
 int animation_ongoing;
 float animation_parameter;
 float move = 2.04;
 int acceleration = 1;
 int road = 200;
 int randomNumber;
+int wallArray[500];
 
 int main(int argc,char** argv){
     
-     GLfloat light_position[] = { 1, 3, 10, 0};
+    GLfloat light_position[] = { 1, 3, 10, 0};
     
     GLfloat light_ambient[] = { 0, 0, 0, 1 };
 
@@ -32,14 +36,19 @@ int main(int argc,char** argv){
     GLfloat light_specular[] = { 1, 1, 1, 1 };
 
     GLfloat model_ambient[] = { 0.4, 0.4, 0.4, 1 };
-
+    
+    srand(time(0));
+    for(i=0;i<500;i++){
+        randomNumber = rand()%5;
+        wallArray[i] = randomNumber;
+    }
     glutInit(&argc,argv);
     glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE);
     
     glutInitWindowSize(600,600);
     glutInitWindowPosition(100,100);
     glutCreateWindow(argv[0]);
-    srand(time(0));
+    
     glutReshapeFunc(on_reshape);
     glutDisplayFunc(on_display);
     glutKeyboardFunc(on_keyboard);
@@ -75,10 +84,9 @@ static void on_display(void){
 
     drawTrack();    
     drawBall();
-    for(i=0;i<20;i++){
-        randomNumber = rand()%5;
-        drawWall(randomNumber,i);
-    }
+    drawWall();
+    crash();
+    
     glutSwapBuffers();
 }
 
@@ -109,6 +117,7 @@ static void on_keyboard(unsigned char key, int x, int y){
             animation_parameter = 0;
             glutPostRedisplay();
             acceleration = 1;
+            score = 0;
             break;
         case 'a':
         case 'A':
@@ -142,6 +151,7 @@ static void on_timer(int id){
     animation_parameter += 0.0022*acceleration;
     acceleration+=1;
     road+=150;
+    score+=1;
     glutPostRedisplay();
 
     if (animation_ongoing) {
@@ -161,6 +171,8 @@ static void drawTrack()
     
     /*Iscrtavaju se linije koje dele stazu na 5 delova*/
     
+    
+       
     glPushMatrix();
         glColor3f(1,1,0);
         glTranslatef(0.54,0.2,5);
@@ -197,18 +209,34 @@ static void drawBall(){
         
         glTranslatef(move,0.5,animation_parameter);
         glRotatef(animation_parameter*acceleration,1,0,0);
-        glutSolidSphere(0.30,100,100);
+        glutSolidSphere(0.30,30,30);
     glPopMatrix();
 }
 
-void drawWall(int randomNumber, int i){
-        
+void drawWall(){
+        for(i=0;i<500;i++){
             glPushMatrix();
                 glColor3f(0, 0, 1);
-               
-                glTranslatef(randomNumber+0.06,1,5+10*i);
+                glTranslatef(wallArray[i]+0.06,1,5+10*i);
                 glScalef(1,1,1);
                 glutSolidCube(1);
             glPopMatrix();
+            
+        }
+}
 
+void crash(){
+    for(i=0;i<500;i++){
+        int xBall = floor(move-0.04+2);
+        int xWall = floor(wallArray[i]+1);
+        int zWall = floor(5+10*i);
+        int zBall = floor(animation_parameter+1.2);
+        if(zBall==zWall && xBall==xWall){
+            printf("Vas skor je: %d\n",score);
+            animation_ongoing = 0;
+            acceleration = 0;
+            animation_parameter = 0;
+            score = 0;
+        }
+    }
 }
