@@ -11,10 +11,16 @@ static void on_reshape(int width, int height);
 static void on_display(void);
 static void on_keyboard(unsigned char key, int x, int y);
 static void on_timer(int id);
+static void output(char* string);
+static void output2(int score);
 static void drawTrack();
 static void drawBall();
 static void drawWall();
+static void drawCoin();
 static void crash();
+static void collectedCoin();
+static void drawDCoin();
+static void collectedDCoin();
 static int i;
 int score = 0;
 int animation_ongoing;
@@ -24,16 +30,19 @@ int acceleration = 1;
 int road = 200;
 int randomNumber;
 int wallArray[500];
+int coinArray[500];
+int coindArray[500];
+
 
 int main(int argc,char** argv){
     
-    GLfloat light_position[] = { 1, 3, 10, 0};
+    GLfloat light_position[] = { 1, 3, 5, 0};
     
     GLfloat light_ambient[] = { 0, 0, 0, 1 };
 
     GLfloat light_diffuse[] = { 0.3, 0.3, 0.3, 1};
 
-    GLfloat light_specular[] = { 1, 1, 1, 1 };
+    GLfloat light_specular[] = { 0.3, 0.3, 0.3, 1 };
 
     GLfloat model_ambient[] = { 0.4, 0.4, 0.4, 1 };
     
@@ -42,9 +51,22 @@ int main(int argc,char** argv){
         randomNumber = rand()%5;
         wallArray[i] = randomNumber;
     }
+
+    for(i=0;i<100;i++){
+        randomNumber = rand()%5;
+        coinArray[i] = randomNumber;
+    }
+
+    for(i=0;i<100;i++){
+        randomNumber = rand()%5;
+        coindArray[i] = randomNumber;
+    }
+
     glutInit(&argc,argv);
     glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE);
     
+    
+
     glutInitWindowSize(600,600);
     glutInitWindowPosition(100,100);
     glutCreateWindow(argv[0]);
@@ -86,7 +108,15 @@ static void on_display(void){
     drawBall();
     drawWall();
     crash();
-    
+    drawCoin();
+    collectedCoin();
+    drawDCoin();
+    collectedDCoin();
+    if(animation_ongoing==0){
+                char* string = {"Vas skor je:"};    
+                output(string);
+                output2(score);
+            }
     glutSwapBuffers();
 }
 
@@ -111,12 +141,15 @@ static void on_keyboard(unsigned char key, int x, int y){
             if(animation_ongoing){
                 animation_ongoing = 0;
             }
+            printf("Vas trenutni skor je: %d\n", score);
             break;
         case 'r':
         case 'R':
             animation_parameter = 0;
+            animation_ongoing = 0;
             glutPostRedisplay();
-            acceleration = 1;
+            acceleration = 3;
+            printf("Vas skor je: %d\n", score);
             score = 0;
             break;
         case 'a':
@@ -205,25 +238,54 @@ static void drawTrack()
 
 static void drawBall(){
     glPushMatrix();
-        //glColor3f(0,0,1);
+        glColor3f(0,1,1);
         
         glTranslatef(move,0.5,animation_parameter);
         glRotatef(animation_parameter*acceleration,1,0,0);
         glutSolidSphere(0.30,30,30);
     glPopMatrix();
+   
+}
+
+void drawCoin(){
+     for(i=0;i<100;i++){
+            glPushMatrix();
+                glColor3f(1,1,0);
+                glTranslatef(coinArray[i]+0.06,0.7,5+50*i);
+                glScalef(0.5,0.5,0.1);
+                glRotatef(animation_parameter*10,0,1,0);
+                glutSolidCube(1);
+            glPopMatrix();
+            
+        }
 }
 
 void drawWall(){
         for(i=0;i<500;i++){
             glPushMatrix();
                 glColor3f(0, 0, 1);
-                glTranslatef(wallArray[i]+0.06,1,5+10*i);
+                glTranslatef(wallArray[i]+0.06,0.5,5+10*i);
                 glScalef(1,1,1);
                 glutSolidCube(1);
             glPopMatrix();
             
         }
 }
+
+
+void drawDCoin(){
+     for(i=0;i<100;i++){
+            glPushMatrix();
+                glColor3f(1, 0, 0);
+                glTranslatef(coindArray[i]+0.06,0.7,5+100*i);
+                glScalef(0.5,0.5,0.1);
+                glRotatef(animation_parameter*10,0,1,0);
+                glutSolidCube(1);
+            glPopMatrix();
+            
+        }
+}
+
 
 void crash(){
     for(i=0;i<500;i++){
@@ -232,11 +294,65 @@ void crash(){
         int zWall = floor(5+10*i);
         int zBall = floor(animation_parameter+1.2);
         if(zBall==zWall && xBall==xWall){
-            printf("Vas skor je: %d\n",score);
             animation_ongoing = 0;
             acceleration = 0;
             animation_parameter = 0;
             score = 0;
         }
     }
+}
+
+void collectedCoin(){
+    for(i=0;i<100;i++){
+        int a = 50;
+        int xBall = floor(move-0.04+2);
+        int xCoin = floor(coinArray[i]+1);
+        int zCoin = floor(5+50*i);
+        int zBall = floor(animation_parameter+1.2);
+        if(zBall==zCoin && xBall==xCoin){
+            printf("Skor je uvecan za: %d\n",a);
+            score+=50;
+        }
+    }
+}
+
+void collectedDCoin(){
+    for(i=0;i<100;i++){
+        int a = 80;
+        int xBall = floor(move-0.04+2);
+        int xCoin = floor(coindArray[i]+1);
+        int zCoin = floor(5+100*i);
+        int zBall = floor(animation_parameter+1.2);
+        if(zBall==zCoin && xBall==xCoin){
+            
+            
+            if(acceleration>100){
+                acceleration-=80;
+                printf("Brzina je smanjena za: %d\n",a);
+            }
+        }
+    }
+}
+
+void output(char *string)
+{
+  glColor3f(1,1,1);
+  glRasterPos3f(1,3,animation_parameter);
+  int len, i;
+  len = (int)strlen(string);
+  for (i = 0; i < len; i++) {
+    glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_10, string[i]);
+  }
+  
+  
+}
+
+void output2(int score)
+{
+  glColor3f(1,1,1);
+  glRasterPos3f(0.5,3,animation_parameter);
+  glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_10, score);
+  
+  
+  
 }
