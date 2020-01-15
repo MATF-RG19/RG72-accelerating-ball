@@ -21,7 +21,3 @@ SRECNO!
 * **R(r)** - Restartovanje igre
 * **Esc** - Izlazak iz igre
 
-<<<<<<< HEAD
-
-=======
->>>>>>> ac77f2049e217be4740e4f9a116b239076ebb02d
