@@ -8,10 +8,10 @@ SRECNO!
 * Potrebno je prethodno instalirati biblioteke OpenGL i glut
 
 ## Pokretanje:
-* Preuzeti repozitorijum komandom: git clone https://github.com/MATF-RG19/RG72-accelerating-ball
+* Preuzeti repozitorijum komandom: **git clone https://github.com/MATF-RG19/RG72-accelerating-ball**
 * Pozicionirati se u preuzetom direktorijumu
-* Pokrenuti Makefile komandom make
-* Pokrenuti igru komandom ./AcceleratingBall
+* Pokrenuti Makefile komandom **make**
+* Pokrenuti igru komandom **./AcceleratingBall**
 
 ## Uputstvo za igru:
 * A(a) - Skretanje u levo
